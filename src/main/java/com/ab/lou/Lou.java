@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Lou {
     static final Logger logger = LoggerFactory.getLogger(Lou.class);
+    static boolean hadError = false;
 
     private Lou() {
     }
@@ -46,6 +48,10 @@ public final class Lou {
 
         byte[] bytes = Files.readAllBytes(path);
         run(new String(bytes, Charset.defaultCharset()));
+
+        if (hadError) {
+            System.exit(65);
+        }
     }
 
     private static void runPrompt() throws IOException {
@@ -64,10 +70,19 @@ public final class Lou {
             }
 
             run(line);
+            hadError = false;
         }
     }
 
     private static void run(String line) {
-        logger.info(line);
+        Scanner scanner = new Scanner(line);
+        List<Token> tokens = scanner.scanTokens();
+
+        logger.debug("{}", tokens);
+    }
+
+    static void error(int line, String message) {
+        System.err.println("[line " + line + "] Error: " + message);
+        hadError = true;
     }
 }
