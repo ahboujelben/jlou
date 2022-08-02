@@ -17,14 +17,13 @@ import org.slf4j.LoggerFactory;
  */
 public final class Lou {
     static final Logger logger = LoggerFactory.getLogger(Lou.class);
-    static boolean hadError = false;
 
     private Lou() {
     }
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
-            System.err.println("Usage: lou [script]");
+            ErrorHandler.error("Usage: lou [script]");
             System.exit(64);
         }
 
@@ -42,14 +41,14 @@ public final class Lou {
         Path path = Paths.get(sourcePath);
 
         if (!path.toFile().exists()) {
-            System.err.println("Location" + sourcePath + "doesn't exist.");
+            ErrorHandler.error("Location " + sourcePath + "doesn't exist.");
             System.exit(64);
         }
 
         byte[] bytes = Files.readAllBytes(path);
         run(new String(bytes, Charset.defaultCharset()));
 
-        if (hadError) {
+        if (ErrorHandler.hadError) {
             System.exit(65);
         }
     }
@@ -70,7 +69,7 @@ public final class Lou {
             }
 
             run(line);
-            hadError = false;
+            ErrorHandler.hadError = false;
         }
     }
 
@@ -78,11 +77,17 @@ public final class Lou {
         Scanner scanner = new Scanner(line);
         List<Token> tokens = scanner.scanTokens();
 
+        // Stop if there was a lexical error.
+        if (ErrorHandler.hadError)
+            return;
         logger.debug("{}", tokens);
-    }
 
-    static void error(int line, String message) {
-        System.err.println("[line " + line + "] Error: " + message);
-        hadError = true;
+        Expr expression = new Parser(tokens).parse();
+
+        // Stop if there was a syntax error.
+        if (ErrorHandler.hadError) {
+            return;
+        }
+        logger.debug(new AstPrinter().print(expression));
     }
 }

@@ -130,7 +130,7 @@ class Scanner {
                     identifier();
 
                 } else {
-                    Lou.error(line, "Unexpected character.");
+                    ErrorHandler.error(line, "Unexpected character.");
                 }
                 break;
         }
@@ -175,7 +175,7 @@ class Scanner {
         }
 
         if (isAtEnd()) {
-            Lou.error(line, "Unterminated string.");
+            ErrorHandler.error(line, "Unterminated string.");
             return;
         }
 

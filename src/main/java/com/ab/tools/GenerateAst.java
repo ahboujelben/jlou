@@ -6,19 +6,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class GenerateAst {
-    static final Logger logger = LoggerFactory.getLogger(GenerateAst.class);
-
     static final String OUTPUT_DIR = "./src/main/java/com/ab/lou";
     static final String OUTPUT_PACKAGE = "com.ab.lou";
 
     public static void main(String[] args) throws IOException {
         if (args.length > 0) {
-            logger.error("Usage: generate_ast");
-            System.exit(64);
+            throw new IllegalArgumentException("Usage: generate_ast");
         }
         defineAst("Expr", Arrays.asList(
                 "Binary   : Expr left, Token operator, Expr right",
