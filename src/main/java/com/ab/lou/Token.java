@@ -19,10 +19,8 @@ class Token {
     public boolean equals(Object obj) {
         if (obj instanceof Token) {
             Token that = (Token) obj;
-            return this.type.equals(that.type)
-                    && this.lexeme.equals(that.lexeme)
-                    && Objects.equals(this.lexeme, that.lexeme)
-                    && this.line == that.line;
+            return this.type.equals(that.type) && this.lexeme.equals(that.lexeme)
+                    && Objects.equals(this.lexeme, that.lexeme) && this.line == that.line;
         }
         return false;
 

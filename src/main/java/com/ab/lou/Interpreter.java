@@ -2,7 +2,6 @@ package com.ab.lou;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.ab.lou.Expr.Binary;
 import com.ab.lou.Expr.Grouping;
 import com.ab.lou.Expr.Literal;
@@ -11,8 +10,7 @@ import com.ab.lou.Expr.Unary;
 class Interpreter implements Expr.Visitor<Object> {
     static final Logger logger = LoggerFactory.getLogger("client");
 
-    Interpreter() {
-    }
+    Interpreter() {}
 
     void interpret(Expr expression) {
         try {

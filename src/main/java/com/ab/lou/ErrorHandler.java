@@ -35,6 +35,5 @@ class ErrorHandler {
         hadError = true;
     }
 
-    private ErrorHandler() {
-    }
+    private ErrorHandler() {}
 }
