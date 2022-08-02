@@ -5,8 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class Scanner {
+    static final Logger logger = LoggerFactory.getLogger(Scanner.class);
     private static final Map<String, TokenType> keywords;
+
     static {
         keywords = new HashMap<>();
         keywords.put("and", TokenType.AND);
@@ -46,6 +51,7 @@ class Scanner {
         }
 
         tokens.add(new Token(TokenType.EOF, "", null, line));
+        logger.debug("{}", tokens);
         return tokens;
     }
 

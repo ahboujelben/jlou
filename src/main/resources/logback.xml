@@ -11,11 +11,11 @@
         </encoder>
     </appender>
 
-    <logger name="com.ab.lou.ErrorHandler" additivity="false">
+    <logger name="client" additivity="false" level="info">
         <appender-ref ref="CLIENT" />
     </logger>
 
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

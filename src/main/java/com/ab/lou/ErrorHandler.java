@@ -4,9 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class ErrorHandler {
-    private static final Logger logger = LoggerFactory.getLogger(ErrorHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger("client");
 
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
 
     static void error(String message) {
         logger.error(message);
@@ -22,6 +23,11 @@ class ErrorHandler {
         } else {
             report(token.line, " at '" + token.lexeme + "'", message);
         }
+    }
+
+    static void runtimeError(RuntimeError error) {
+        logger.error("[line {}]: {}", error.token.line, error.getMessage());
+        hadRuntimeError = true;
     }
 
     private static void report(int line, String where, String message) {

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Lou {
     static final Logger logger = LoggerFactory.getLogger(Lou.class);
+    private static final Interpreter interpreter = new Interpreter();
 
     private Lou() {
     }
@@ -51,6 +52,10 @@ public final class Lou {
         if (ErrorHandler.hadError) {
             System.exit(65);
         }
+
+        if (ErrorHandler.hadRuntimeError) {
+            System.exit(70);
+        }
     }
 
     private static void runPrompt() throws IOException {
@@ -74,20 +79,23 @@ public final class Lou {
     }
 
     private static void run(String line) {
+        // Scan
         Scanner scanner = new Scanner(line);
         List<Token> tokens = scanner.scanTokens();
 
         // Stop if there was a lexical error.
         if (ErrorHandler.hadError)
             return;
-        logger.debug("{}", tokens);
 
+        // Parse
         Expr expression = new Parser(tokens).parse();
 
         // Stop if there was a syntax error.
-        if (ErrorHandler.hadError) {
+        if (ErrorHandler.hadError || expression == null) {
             return;
         }
-        logger.debug(new AstPrinter().print(expression));
+
+        // Interpret
+        interpreter.interpret(expression);
     }
 }

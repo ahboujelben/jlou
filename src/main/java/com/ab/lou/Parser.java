@@ -2,7 +2,12 @@ package com.ab.lou;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class Parser {
+    static final Logger logger = LoggerFactory.getLogger(Parser.class);
+
     private static class ParseError extends RuntimeException {
     }
 
@@ -15,7 +20,9 @@ class Parser {
 
     Expr parse() {
         try {
-            return expression();
+            Expr expr = expression();
+            logger.debug(new AstPrinter().print(expr));
+            return expr;
         } catch (ParseError error) {
             return null;
         }
