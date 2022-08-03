@@ -1,5 +1,8 @@
 package com.ab.lou;
 
+import com.ab.lou.Expr.Assign;
+import com.ab.lou.Expr.Variable;
+
 class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitBinaryExpr(Expr.Binary expr) {
@@ -16,6 +19,16 @@ class AstPrinter implements Expr.Visitor<String> {
         if (expr.value == null)
             return "nil";
         return expr.value.toString();
+    }
+
+    @Override
+    public String visitVariableExpr(Variable expr) {
+        return expr.name.lexeme;
+    }
+
+    @Override
+    public String visitAssignExpr(Assign expr) {
+        return parenthesize(expr.name.lexeme + "=", expr.value);
     }
 
     @Override

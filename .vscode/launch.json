@@ -6,17 +6,25 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Launch GenerateAst",
+      "name": "Generate Ast",
       "request": "launch",
       "mainClass": "com.ab.tools.GenerateAst",
       "projectName": "lou"
     },
     {
       "type": "java",
-      "name": "Launch App",
+      "name": "Launch REPL",
       "request": "launch",
       "mainClass": "com.ab.lou.Lou",
       "projectName": "lou"
+    },
+    {
+      "type": "java",
+      "name": "Execute Source File",
+      "request": "launch",
+      "mainClass": "com.ab.lou.Lou",
+      "projectName": "lou",
+      "args": "samples/hello.lou"
     },
     {
       "type": "java",

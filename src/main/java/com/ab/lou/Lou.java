@@ -32,6 +32,7 @@ public final class Lou {
         }
 
         if (args.length == 0) {
+            interpreter.setRepl(true);
             runPrompt();
         }
     }
@@ -40,7 +41,7 @@ public final class Lou {
         Path path = Paths.get(sourcePath);
 
         if (!path.toFile().exists()) {
-            ErrorHandler.error("Location " + sourcePath + "doesn't exist.");
+            ErrorHandler.error("Location " + sourcePath + " doesn't exist.");
             System.exit(64);
         }
 
@@ -86,14 +87,14 @@ public final class Lou {
             return;
 
         // Parse
-        Expr expression = new Parser(tokens).parse();
+        List<Stmt> statements = new Parser(tokens).parse();
 
         // Stop if there was a syntax error.
-        if (ErrorHandler.hadError || expression == null) {
+        if (ErrorHandler.hadError) {
             return;
         }
 
         // Interpret
-        interpreter.interpret(expression);
+        interpreter.interpret(statements);
     }
 }

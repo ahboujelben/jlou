@@ -1,29 +1,93 @@
 package com.ab.lou;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.ab.lou.Expr.Assign;
 import com.ab.lou.Expr.Binary;
 import com.ab.lou.Expr.Grouping;
 import com.ab.lou.Expr.Literal;
 import com.ab.lou.Expr.Unary;
+import com.ab.lou.Expr.Variable;
+import com.ab.lou.Stmt.Block;
+import com.ab.lou.Stmt.Expression;
+import com.ab.lou.Stmt.Print;
+import com.ab.lou.Stmt.Var;
 
-class Interpreter implements Expr.Visitor<Object> {
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     static final Logger logger = LoggerFactory.getLogger("client");
+
+    private Environment environment = new Environment();
+    private boolean isRepl = false;
 
     Interpreter() {}
 
-    void interpret(Expr expression) {
+    void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expression);
-            logger.info(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+        } catch (RuntimeError error) {
+            ErrorHandler.runtimeError(error);
+        }
+    }
+
+    void interpretExpression(Expr expression) {
+        try {
+            evaluate(expression);
         } catch (RuntimeError error) {
             ErrorHandler.runtimeError(error);
         }
     }
 
     @Override
+    public Void visitBlockStmt(Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, value);
+        return null;
+    }
+
+    @Override
+    public Void visitExpressionStmt(Expression stmt) {
+        Object value = evaluate(stmt.expression);
+        if (isRepl) {
+            logger.info(stringify(value));
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Print stmt) {
+        Object value = evaluate(stmt.expression);
+        logger.info(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Object visitAssignExpr(Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+        return value;
+    }
+
+    @Override
     public Object visitLiteralExpr(Literal expr) {
         return expr.value;
+    }
+
+    @Override
+    public Object visitVariableExpr(Variable expr) {
+        return environment.get(expr.name);
     }
 
     @Override
@@ -41,10 +105,9 @@ class Interpreter implements Expr.Visitor<Object> {
             case MINUS:
                 checkNumberOperand(expr.operator, right);
                 return -(double) right;
+            default:
+                return null;
         }
-
-        // Unreachable.
-        return null;
     }
 
     @Override
@@ -88,14 +151,30 @@ class Interpreter implements Expr.Visitor<Object> {
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left * (double) right;
+            default:
+                return null;
         }
+    }
 
-        // Unreachable.
-        return null;
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     private Object evaluate(Expr expr) {
         return expr.accept(this);
+    }
+
+    void executeBlock(List<Stmt> statements, Environment environment) {
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
+
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
     }
 
     private boolean isTruthy(Object object) {
@@ -143,4 +222,7 @@ class Interpreter implements Expr.Visitor<Object> {
         throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
+    public void setRepl(boolean isRepl) {
+        this.isRepl = isRepl;
+    }
 }
