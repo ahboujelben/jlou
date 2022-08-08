@@ -1,0 +1,36 @@
+{
+  "folders": [
+    {
+      "path": "lou-codegen"
+    },
+    {
+      "path": "lou-core"
+    }
+  ],
+  "settings": {
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    },
+    "[java]": {
+      "editor.defaultFormatter": "redhat.java",
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.format.settings.url": "eclipse-formatter.xml"
+  },
+  "launch": {
+    "configurations": [
+      {
+        "type": "java",
+        "name": "Launch Current File",
+        "request": "launch",
+        "mainClass": "${file}"
+      }
+    ],
+    "compounds": []
+  }
+}
