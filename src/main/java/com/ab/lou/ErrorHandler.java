@@ -25,7 +25,7 @@ class ErrorHandler {
         }
     }
 
-    static void runtimeError(RuntimeError error) {
+    static void runtimeError(LouExceptions.RuntimeError error) {
         report(error.token.line, " at '" + error.token.lexeme + "'", error.getMessage());
         hadRuntimeError = true;
     }

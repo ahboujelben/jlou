@@ -11,6 +11,7 @@ import com.ab.lou.Expr.Literal;
 import com.ab.lou.Expr.Unary;
 import com.ab.lou.Expr.Variable;
 import com.ab.lou.Stmt.Block;
+import com.ab.lou.Stmt.Break;
 import com.ab.lou.Stmt.Expression;
 import com.ab.lou.Stmt.Print;
 import com.ab.lou.Stmt.Var;
@@ -27,7 +28,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             for (Stmt statement : statements) {
                 execute(statement);
             }
-        } catch (RuntimeError error) {
+        } catch (LouExceptions.RuntimeError error) {
             ErrorHandler.runtimeError(error);
         }
     }
@@ -49,6 +50,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitBlockStmt(Block stmt) {
         executeBlock(stmt.statements, new Environment(environment));
         return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Break stmt) {
+        throw new LouExceptions.Break(stmt.name);
     }
 
     @Override
@@ -77,7 +83,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
+            try {
+                execute(stmt.body);
+            } catch (LouExceptions.Break error) {
+                return null;
+            }
         }
         return null;
     }
@@ -169,7 +179,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 if (left instanceof String && right instanceof String) {
                     return (String) left + (String) right;
                 }
-                throw new RuntimeError(expr.operator,
+                throw new LouExceptions.RuntimeError(expr.operator,
                         "Operands must be two numbers or two strings.");
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
@@ -233,14 +243,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double)
             return;
-        throw new RuntimeError(operator, "Operand must be a number.");
+        throw new LouExceptions.RuntimeError(operator, "Operand must be a number.");
     }
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double)
             return;
 
-        throw new RuntimeError(operator, "Operands must be numbers.");
+        throw new LouExceptions.RuntimeError(operator, "Operands must be numbers.");
     }
 
     private void printToClient(String message) {

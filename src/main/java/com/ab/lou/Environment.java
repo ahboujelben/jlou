@@ -33,7 +33,7 @@ class Environment {
             return;
         }
 
-        throw new RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
+        throw new LouExceptions.RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
     }
 
     Object get(Token name) {
@@ -45,6 +45,6 @@ class Environment {
             return enclosing.get(name);
         }
 
-        throw new RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
+        throw new LouExceptions.RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
     }
 }

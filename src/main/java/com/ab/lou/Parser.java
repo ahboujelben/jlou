@@ -55,6 +55,9 @@ class Parser {
     }
 
     private Stmt statement() {
+        if (match(TokenType.BREAK))
+            return breakStatement();
+
         if (match(TokenType.IF))
             return ifStatement();
 
@@ -71,6 +74,11 @@ class Parser {
             return whileStatement();
 
         return expressionStatement();
+    }
+
+    private Stmt breakStatement() {
+        consume(TokenType.SEMICOLON, "Expect ';' after 'break'.");
+        return new Stmt.Break(previous());
     }
 
     private Stmt ifStatement() {

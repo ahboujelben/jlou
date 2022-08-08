@@ -16,13 +16,12 @@ public class GenerateAst {
         }
         defineAst("Expr", Arrays.asList("Assign: Token name, Expr value",
                 "Binary: Expr left, Token operator, Expr right", "Grouping: Expr expression",
-                "Literal: Object value", "Logical  : Expr left, Token operator, Expr right",
-                "Unary: Token operator, Expr right", "Variable : Token name"));
-        defineAst("Stmt",
-                Arrays.asList("Block: List<Stmt> statements", "Expression: Expr expression",
-                        "If: Expr condition, Stmt thenBranch, Stmt elseBranch",
-                        "Print: Expr expression", "Var: Token name, Expr initializer",
-                        "While: Expr condition, Stmt body"));
+                "Literal: Object value", "Logical: Expr left, Token operator, Expr right",
+                "Unary: Token operator, Expr right", "Variable: Token name"));
+        defineAst("Stmt", Arrays.asList("Block: List<Stmt> statements", "Break: Token name",
+                "Expression: Expr expression",
+                "If: Expr condition, Stmt thenBranch, Stmt elseBranch", "Print: Expr expression",
+                "Var: Token name, Expr initializer", "While: Expr condition, Stmt body"));
     }
 
     private static void defineAst(String baseName, List<String> types) throws IOException {
