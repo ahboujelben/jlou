@@ -1,6 +1,7 @@
 package com.ab.lou;
 
 import com.ab.lou.Expr.Assign;
+import com.ab.lou.Expr.Logical;
 import com.ab.lou.Expr.Variable;
 
 class AstPrinter implements Expr.Visitor<String> {
@@ -33,6 +34,11 @@ class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitAssignExpr(Assign expr) {
         return parenthesize(expr.name.lexeme + "=", expr.value);
+    }
+
+    @Override
+    public String visitLogicalExpr(Logical expr) {
+        return parenthesize(expr.operator.lexeme, expr.left, expr.right);
     }
 
     @Override

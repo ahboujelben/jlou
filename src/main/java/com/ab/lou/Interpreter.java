@@ -19,7 +19,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     static final Logger logger = LoggerFactory.getLogger("client");
 
     private Environment environment = new Environment();
-    private boolean isRepl = false;
 
     Interpreter() {}
 
@@ -33,19 +32,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
     }
 
-    void interpretExpression(Expr expression) {
-        try {
-            evaluate(expression);
-        } catch (RuntimeError error) {
-            ErrorHandler.runtimeError(error);
-        }
-    }
-
-    @Override
-    public Void visitBlockStmt(Block stmt) {
-        executeBlock(stmt.statements, new Environment(environment));
-        return null;
-    }
+    // Statements
 
     @Override
     public Void visitVarStmt(Var stmt) {
@@ -59,10 +46,23 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitBlockStmt(Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Expression stmt) {
-        Object value = evaluate(stmt.expression);
-        if (isRepl) {
-            printToClient(stringify(value));
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
         }
         return null;
     }
@@ -73,6 +73,16 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         printToClient(stringify(value));
         return null;
     }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body);
+        }
+        return null;
+    }
+
+    // Expressions
 
     @Override
     public Object visitAssignExpr(Assign expr) {
@@ -94,6 +104,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitGroupingExpr(Grouping expr) {
         return evaluate(expr.expression);
+    }
+
+    @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+
+        if (expr.operator.type == TokenType.OR) {
+            if (isTruthy(left))
+                return left;
+        } else {
+            if (!isTruthy(left))
+                return left;
+        }
+
+        return evaluate(expr.right);
     }
 
     @Override
@@ -222,9 +247,5 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (logger.isInfoEnabled()) {
             logger.info(message);
         }
-    }
-
-    public void setRepl(boolean isRepl) {
-        this.isRepl = isRepl;
     }
 }

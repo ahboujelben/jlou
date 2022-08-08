@@ -32,7 +32,6 @@ public final class Lou {
         }
 
         if (args.length == 0) {
-            interpreter.setRepl(true);
             runPrompt();
         }
     }

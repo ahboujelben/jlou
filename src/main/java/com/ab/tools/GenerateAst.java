@@ -14,14 +14,15 @@ public class GenerateAst {
         if (args.length > 0) {
             throw new IllegalArgumentException("Usage: generate_ast");
         }
-        defineAst("Expr",
-                Arrays.asList("Assign: Token name, Expr value",
-                        "Binary: Expr left, Token operator, Expr right",
-                        "Grouping: Expr expression", "Literal: Object value",
-                        "Unary: Token operator, Expr right", "Variable : Token name"));
+        defineAst("Expr", Arrays.asList("Assign: Token name, Expr value",
+                "Binary: Expr left, Token operator, Expr right", "Grouping: Expr expression",
+                "Literal: Object value", "Logical  : Expr left, Token operator, Expr right",
+                "Unary: Token operator, Expr right", "Variable : Token name"));
         defineAst("Stmt",
                 Arrays.asList("Block: List<Stmt> statements", "Expression: Expr expression",
-                        "Print: Expr expression", "Var: Token name, Expr initializer"));
+                        "If: Expr condition, Stmt thenBranch, Stmt elseBranch",
+                        "Print: Expr expression", "Var: Token name, Expr initializer",
+                        "While: Expr condition, Stmt body"));
     }
 
     private static void defineAst(String baseName, List<String> types) throws IOException {
@@ -90,6 +91,7 @@ public class GenerateAst {
             String typeName = type.split(":")[0].trim();
             writer.println("    R visit" + typeName + baseName + "(" + typeName + " "
                     + baseName.toLowerCase() + ");");
+            writer.println();
         }
 
         writer.println("  }");
