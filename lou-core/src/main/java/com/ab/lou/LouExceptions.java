@@ -13,17 +13,17 @@ class LouExceptions {
         }
     }
 
-    static class Break extends RuntimeError {
-        Break(Token token) {
-            super(token, "'break' can only be called inside loops.");
+    static class Break extends RuntimeException {
+        Break() {
+            super();
         }
     }
 
-    static class Return extends RuntimeError {
+    static class Return extends RuntimeException {
         final Object value;
 
-        Return(Token token, Object value) {
-            super(token, "'return' can only be called inside callables.");
+        Return(Object value) {
+            super();
             this.value = value;
         }
     }

@@ -8,17 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Lou main class
  */
 public final class Lou {
-    static final Logger logger = LoggerFactory.getLogger(Lou.class);
     private static final Interpreter interpreter = new Interpreter();
 
-    private Lou() {}
+    private Lou() {
+    }
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -77,7 +75,7 @@ public final class Lou {
     }
 
     private static void run(String line) {
-        // Scan
+        // Scan source code tokens
         Scanner scanner = new Scanner(line);
         List<Token> tokens = scanner.scanTokens();
 
@@ -85,10 +83,19 @@ public final class Lou {
         if (ErrorHandler.hadError)
             return;
 
-        // Parse
+        // Parse tokens
         List<Stmt> statements = new Parser(tokens).parse();
 
         // Stop if there was a syntax error.
+        if (ErrorHandler.hadError) {
+            return;
+        }
+
+        // Resolve syntax
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
+
+        // Stop if the semantic analysis fails
         if (ErrorHandler.hadError) {
             return;
         }
