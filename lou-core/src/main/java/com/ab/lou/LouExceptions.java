@@ -1,7 +1,8 @@
 package com.ab.lou;
 
 class LouExceptions {
-    private LouExceptions() {}
+    private LouExceptions() {
+    }
 
     static class RuntimeError extends RuntimeException {
         final Token token;
@@ -18,11 +19,11 @@ class LouExceptions {
         }
     }
 
-    static class Return extends RuntimeException {
+    static class Return extends RuntimeError {
         final Object value;
 
-        Return(Object value) {
-            super(null, null, false, false);
+        Return(Token token, Object value) {
+            super(token, "'return' can only be called inside callables.");
             this.value = value;
         }
     }

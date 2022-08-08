@@ -1,6 +1,7 @@
 package com.ab.lou;
 
 import com.ab.lou.Expr.Assign;
+import com.ab.lou.Expr.Call;
 import com.ab.lou.Expr.Logical;
 import com.ab.lou.Expr.Variable;
 
@@ -12,6 +13,20 @@ class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitBinaryExpr(Expr.Binary expr) {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+    }
+
+    @Override
+    public String visitCallExpr(Call expr) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("(function ").append(expr.callee.toString()).append(":");
+        for (Expr arg : expr.arguments) {
+            builder.append(", ");
+            builder.append(print(arg));
+        }
+        builder.append(")");
+
+        return builder.toString();
     }
 
     @Override

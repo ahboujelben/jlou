@@ -3,6 +3,7 @@ package com.ab.lou;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,17 +59,23 @@ class Parser {
         if (match(TokenType.BREAK))
             return breakStatement();
 
+        if (match(TokenType.FOR))
+            return forStatement();
+
+        if (match(TokenType.FUN))
+            return function("function");
+
         if (match(TokenType.IF))
             return ifStatement();
 
         if (match(TokenType.LEFT_BRACE))
             return new Stmt.Block(block());
 
-        if (match(TokenType.FOR))
-            return forStatement();
-
         if (match(TokenType.PRINT))
             return printStatement();
+
+        if (match(TokenType.RETURN))
+            return returnStatement();
 
         if (match(TokenType.WHILE))
             return whileStatement();
@@ -77,33 +84,9 @@ class Parser {
     }
 
     private Stmt breakStatement() {
+        Token keyword = previous();
         consume(TokenType.SEMICOLON, "Expect ';' after 'break'.");
-        return new Stmt.Break(previous());
-    }
-
-    private Stmt ifStatement() {
-        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
-        Expr condition = expression();
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
-
-        Stmt thenBranch = statement();
-        Stmt elseBranch = null;
-        if (match(TokenType.ELSE)) {
-            elseBranch = statement();
-        }
-
-        return new Stmt.If(condition, thenBranch, elseBranch);
-    }
-
-    private List<Stmt> block() {
-        List<Stmt> statements = new ArrayList<>();
-
-        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(declaration());
-        }
-
-        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
-        return statements;
+        return new Stmt.Break(keyword);
     }
 
     private Stmt forStatement() {
@@ -147,17 +130,71 @@ class Parser {
         return body;
     }
 
+    private Stmt.Function function(String kind) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
+
+        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+        List<Token> parameters = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+
+        List<Stmt> body = block();
+
+        return new Stmt.Function(name, parameters, body);
+    }
+
+    private Stmt ifStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(TokenType.ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
+    }
+
     private Stmt printStatement() {
         Expr value = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
     }
 
-    private Stmt expressionStatement() {
-        Expr expr = expression();
-        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
-        debug(new AstPrinter().print(expr));
-        return new Stmt.Expression(expr);
+    private Stmt returnStatement() {
+        Token keyword = previous();
+        Expr value = null;
+
+        if (!check(TokenType.SEMICOLON)) {
+            value = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
     }
 
     private Stmt whileStatement() {
@@ -167,6 +204,13 @@ class Parser {
         Stmt body = statement();
 
         return new Stmt.While(condition, body);
+    }
+
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        debug(new AstPrinter().print(expr));
+        return new Stmt.Expression(expr);
     }
 
     // Expressions
@@ -273,7 +317,37 @@ class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+
+        while (true) {
+            if (match(TokenType.LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (arguments.size() == 255) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.add(expression());
+            } while (match(TokenType.COMMA));
+        }
+
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
     }
 
     private Expr primary() {

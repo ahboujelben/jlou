@@ -1,9 +1,12 @@
 package com.ab.lou;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.ab.lou.Expr.Assign;
 import com.ab.lou.Expr.Binary;
 import com.ab.lou.Expr.Grouping;
@@ -13,15 +16,34 @@ import com.ab.lou.Expr.Variable;
 import com.ab.lou.Stmt.Block;
 import com.ab.lou.Stmt.Break;
 import com.ab.lou.Stmt.Expression;
+import com.ab.lou.Stmt.Function;
 import com.ab.lou.Stmt.Print;
 import com.ab.lou.Stmt.Var;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     static final Logger logger = LoggerFactory.getLogger("client");
 
-    private Environment environment = new Environment();
+    final Environment globals = new Environment();
+    private Environment environment = globals;
 
-    Interpreter() {}
+    Interpreter() {
+        globals.define("clock", new LouCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() {
+                return "<native fn>";
+            }
+        });
+    }
 
     void interpret(List<Stmt> statements) {
         try {
@@ -54,7 +76,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitBreakStmt(Break stmt) {
-        throw new LouExceptions.Break(stmt.name);
+        throw new LouExceptions.Break(stmt.keyword);
+    }
+
+    @Override
+    public Void visitFunctionStmt(Function stmt) {
+        LouFunction function = new LouFunction(stmt, environment);
+        environment.define(stmt.name.lexeme, function);
+        return null;
     }
 
     @Override
@@ -78,6 +107,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object value = evaluate(stmt.expression);
         printToClient(stringify(value));
         return null;
+    }
+
+    @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.value != null)
+            value = evaluate(stmt.value);
+
+        throw new LouExceptions.Return(stmt.keyword, value);
     }
 
     @Override
@@ -190,6 +228,29 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             default:
                 return null;
         }
+    }
+
+    @Override
+    public Object visitCallExpr(Expr.Call expr) {
+        Object callee = evaluate(expr.callee);
+
+        List<Object> arguments = new ArrayList<>();
+        for (Expr argument : expr.arguments) {
+            arguments.add(evaluate(argument));
+        }
+
+        if (!(callee instanceof LouCallable)) {
+            throw new LouExceptions.RuntimeError(expr.paren, "Can only call functions and classes.");
+        }
+
+        LouCallable function = (LouCallable) callee;
+
+        if (arguments.size() != function.arity()) {
+            throw new LouExceptions.RuntimeError(expr.paren,
+                    "Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
+        }
+
+        return function.call(this, arguments);
     }
 
     private void execute(Stmt stmt) {
