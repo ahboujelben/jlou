@@ -26,7 +26,7 @@ class ErrorHandler {
     }
 
     static void runtimeError(RuntimeError error) {
-        logger.error("[line {}]: {}", error.token.line, error.getMessage());
+        report(error.token.line, " at '" + error.token.lexeme + "'", error.getMessage());
         hadRuntimeError = true;
     }
 

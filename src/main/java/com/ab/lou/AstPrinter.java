@@ -4,6 +4,10 @@ import com.ab.lou.Expr.Assign;
 import com.ab.lou.Expr.Variable;
 
 class AstPrinter implements Expr.Visitor<String> {
+    String print(Expr expr) {
+        return expr.accept(this);
+    }
+
     @Override
     public String visitBinaryExpr(Expr.Binary expr) {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right);
@@ -34,10 +38,6 @@ class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         return parenthesize(expr.operator.lexeme, expr.right);
-    }
-
-    String print(Expr expr) {
-        return expr.accept(this);
     }
 
     private String parenthesize(String name, Expr... exprs) {

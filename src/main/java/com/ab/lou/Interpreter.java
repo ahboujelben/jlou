@@ -1,6 +1,7 @@
 package com.ab.lou;
 
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ab.lou.Expr.Assign;
@@ -61,7 +62,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitExpressionStmt(Expression stmt) {
         Object value = evaluate(stmt.expression);
         if (isRepl) {
-            logger.info(stringify(value));
+            printToClient(stringify(value));
         }
         return null;
     }
@@ -69,7 +70,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitPrintStmt(Print stmt) {
         Object value = evaluate(stmt.expression);
-        logger.info(stringify(value));
+        printToClient(stringify(value));
         return null;
     }
 
@@ -186,12 +187,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     private boolean isEqual(Object a, Object b) {
-        if (a == null && b == null)
-            return true;
-        if (a == null)
-            return false;
-
-        return a.equals(b);
+        return Objects.equals(a, b);
     }
 
     private String stringify(Object object) {
@@ -220,6 +216,12 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             return;
 
         throw new RuntimeError(operator, "Operands must be numbers.");
+    }
+
+    private void printToClient(String message) {
+        if (logger.isInfoEnabled()) {
+            logger.info(message);
+        }
     }
 
     public void setRepl(boolean isRepl) {

@@ -27,16 +27,6 @@ class Parser {
         return statements;
     }
 
-    Expr parseExpression() {
-        try {
-            Expr expr = expression();
-            logger.debug(new AstPrinter().print(expr));
-            return expr;
-        } catch (ParseError error) {
-            return null;
-        }
-    }
-
     private Stmt declaration() {
         try {
             if (match(TokenType.VAR))
@@ -91,7 +81,7 @@ class Parser {
     private Stmt expressionStatement() {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
-        logger.debug(new AstPrinter().print(expr));
+        debug(new AstPrinter().print(expr));
         return new Stmt.Expression(expr);
     }
 
@@ -270,6 +260,12 @@ class Parser {
             }
 
             advance();
+        }
+    }
+
+    private void debug(String message) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(message);
         }
     }
 }

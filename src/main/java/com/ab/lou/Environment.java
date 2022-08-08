@@ -17,17 +17,6 @@ class Environment {
         this.enclosing = enclosing;
     }
 
-    Object get(Token name) {
-        if (values.containsKey(name.lexeme)) {
-            return values.get(name.lexeme);
-        }
-
-        if (enclosing != null) {
-            return enclosing.get(name);
-        }
-
-        throw new RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
-    }
 
     void define(String name, Object value) {
         values.put(name, value);
@@ -42,6 +31,18 @@ class Environment {
         if (enclosing != null) {
             enclosing.assign(name, value);
             return;
+        }
+
+        throw new RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
+    }
+
+    Object get(Token name) {
+        if (values.containsKey(name.lexeme)) {
+            return values.get(name.lexeme);
+        }
+
+        if (enclosing != null) {
+            return enclosing.get(name);
         }
 
         throw new RuntimeError(name, UNDEFINED_VAR + " '" + name.lexeme + "'.");
