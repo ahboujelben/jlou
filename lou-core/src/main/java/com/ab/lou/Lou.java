@@ -9,10 +9,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Lou main class
  */
 public final class Lou {
+    static final Logger logger = LoggerFactory.getLogger("client");
     private static final Interpreter interpreter = new Interpreter();
 
     private Lou() {
@@ -20,7 +24,7 @@ public final class Lou {
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
-            ErrorHandler.error("Usage: lou [script]");
+            logger.error("Usage: lou [script]");
             System.exit(64);
         }
 
@@ -38,7 +42,7 @@ public final class Lou {
         Path path = Paths.get(sourcePath);
 
         if (!path.toFile().exists()) {
-            ErrorHandler.error("Location " + sourcePath + " doesn't exist.");
+            logger.error("Location {} doesn't exist.", sourcePath);
             System.exit(64);
         }
 
@@ -55,6 +59,8 @@ public final class Lou {
     }
 
     private static void runPrompt() throws IOException {
+        logger.info("Lou Interpreter");
+
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader bufferReader = new BufferedReader(input);
 
@@ -63,10 +69,6 @@ public final class Lou {
 
             if (line == null) {
                 break;
-            }
-
-            if (line.equals("exit")) {
-                System.exit(0);
             }
 
             run(line);

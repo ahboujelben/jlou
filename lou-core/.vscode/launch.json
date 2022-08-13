@@ -17,7 +17,7 @@
       "request": "launch",
       "mainClass": "com.ab.lou.Lou",
       "projectName": "lou-core",
-      "args": "samples/hello.lou"
+      "args": "samples/hello_world.lou"
     }
   ]
 }

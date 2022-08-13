@@ -9,10 +9,6 @@ class ErrorHandler {
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
 
-    static void error(String message) {
-        logger.error(message);
-    }
-
     static void error(int line, String message) {
         report(line, "", message);
     }
@@ -35,5 +31,6 @@ class ErrorHandler {
         hadError = true;
     }
 
-    private ErrorHandler() {}
+    private ErrorHandler() {
+    }
 }
