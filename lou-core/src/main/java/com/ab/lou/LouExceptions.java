@@ -4,6 +4,9 @@ class LouExceptions {
     private LouExceptions() {
     }
 
+    static class ParseError extends RuntimeException {
+    }
+
     static class RuntimeError extends RuntimeException {
         final Token token;
 

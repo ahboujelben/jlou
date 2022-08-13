@@ -4,15 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ab.lou.LouExceptions.ParseError;
 
 class Parser {
-    static final Logger logger = LoggerFactory.getLogger(Parser.class);
-
-    private static class ParseError extends RuntimeException {
-    }
-
     private final List<Token> tokens;
     private int current = 0;
 
@@ -209,7 +203,6 @@ class Parser {
     private Stmt expressionStatement() {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
-        debug(new AstPrinter().print(expr));
         return new Stmt.Expression(expr);
     }
 
@@ -420,7 +413,7 @@ class Parser {
 
     private ParseError error(Token token, String message) {
         ErrorHandler.error(token, message);
-        return new ParseError();
+        return new LouExceptions.ParseError();
     }
 
     private void synchronize() {
@@ -444,12 +437,6 @@ class Parser {
             }
 
             advance();
-        }
-    }
-
-    private void debug(String message) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(message);
         }
     }
 }

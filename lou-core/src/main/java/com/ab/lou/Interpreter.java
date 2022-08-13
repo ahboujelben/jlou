@@ -108,7 +108,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitPrintStmt(Print stmt) {
         Object value = evaluate(stmt.expression);
-        printToClient(stringify(value));
+        logger.info(stringify(value));
         return null;
     }
 
@@ -335,11 +335,5 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             return;
 
         throw new LouExceptions.RuntimeError(operator, "Operands must be numbers.");
-    }
-
-    private void printToClient(String message) {
-        if (logger.isInfoEnabled()) {
-            logger.info(message);
-        }
     }
 }
