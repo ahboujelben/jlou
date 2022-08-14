@@ -1,3 +1,3 @@
 # Lou - AST Interpreter
 
-A tree-walk interpreter that builds upon snippets from Crafting Interpreters by Robert Nystrom.
+A tree-walk interpreter that builds upon Robert Nystrom's code from Crafting Interpreters.
