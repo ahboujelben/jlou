@@ -7,11 +7,13 @@ import java.util.List;
 import com.ab.lou.LouExceptions.ParseError;
 
 class Parser {
+    private final Reporter reporter;
     private final List<Token> tokens;
     private int current = 0;
 
-    Parser(List<Token> tokens) {
+    Parser(List<Token> tokens, Reporter reporter) {
         this.tokens = tokens;
+        this.reporter = reporter;
     }
 
     List<Stmt> parse() {
@@ -412,7 +414,7 @@ class Parser {
     }
 
     private ParseError error(Token token, String message) {
-        ErrorHandler.error(token, message);
+        reporter.error(token, message);
         return new LouExceptions.ParseError();
     }
 

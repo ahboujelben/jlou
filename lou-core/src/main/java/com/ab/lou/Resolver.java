@@ -24,13 +24,15 @@ import com.ab.lou.Stmt.Var;
 import com.ab.lou.Stmt.While;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
+    private final Reporter reporter;
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private CallableType currentFunction = null;
     private boolean isInsideLoop = false;
 
-    Resolver(Interpreter interpreter) {
+    Resolver(Interpreter interpreter, Reporter reporter) {
         this.interpreter = interpreter;
+        this.reporter = reporter;
     }
 
     // Statements
@@ -46,7 +48,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitBreakStmt(Break stmt) {
         if (!isInsideLoop) {
-            ErrorHandler.error(stmt.keyword, "Can't break from outside a loop.");
+            reporter.error(stmt.keyword, "Can't break from outside a loop.");
         }
 
         return null;
@@ -88,7 +90,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitReturnStmt(Return stmt) {
         if (currentFunction == null) {
-            ErrorHandler.error(stmt.keyword, "Can't return from top-level code.");
+            reporter.error(stmt.keyword, "Can't return from top-level code.");
         }
 
         if (stmt.value != null) {
@@ -172,7 +174,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitVariableExpr(Variable expr) {
         if (!scopes.isEmpty() && scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
-            ErrorHandler.error(expr.name, "Can't read local variable in its own initializer.");
+            reporter.error(expr.name, "Can't read local variable in its own initializer.");
         }
 
         resolveLocal(expr, expr.name);
@@ -208,7 +210,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         Map<String, Boolean> scope = scopes.peek();
 
         if (scope.containsKey(name.lexeme)) {
-            ErrorHandler.error(name, "Already a variable with this name in this scope.");
+            reporter.error(name, "Already a variable with this name in this scope.");
         }
 
         scope.put(name.lexeme, false);

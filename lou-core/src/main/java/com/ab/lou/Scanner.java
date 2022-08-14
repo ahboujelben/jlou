@@ -29,6 +29,7 @@ class Scanner {
         keywords.put("while", TokenType.WHILE);
     }
 
+    private final Reporter reporter;
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
 
@@ -36,8 +37,9 @@ class Scanner {
     private int current = 0;
     private int line = 1;
 
-    Scanner(String source) {
+    Scanner(String source, Reporter reporter) {
         this.source = source;
+        this.reporter = reporter;
     }
 
     List<Token> scanTokens() {
@@ -132,7 +134,7 @@ class Scanner {
                     identifier();
 
                 } else {
-                    ErrorHandler.error(line, "Unexpected character.");
+                    reporter.error(line, "Unexpected character.");
                 }
                 break;
         }
@@ -177,7 +179,7 @@ class Scanner {
         }
 
         if (isAtEnd()) {
-            ErrorHandler.error(line, "Unterminated string.");
+            reporter.error(line, "Unterminated string.");
             return;
         }
 

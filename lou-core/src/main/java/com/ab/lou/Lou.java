@@ -16,50 +16,54 @@ import org.slf4j.LoggerFactory;
  * Lou main class
  */
 public final class Lou {
-    static final Logger logger = LoggerFactory.getLogger("client");
-    private static final Interpreter interpreter = new Interpreter();
+    private final Reporter reporter;
+    private final Interpreter interpreter;
 
-    private Lou() {
+    Lou(Logger logger) {
+        reporter = new Reporter(logger);
+        interpreter = new Interpreter(reporter);
     }
 
     public static void main(String[] args) throws IOException {
+        Lou lou = new Lou(LoggerFactory.getLogger("client"));
+
         if (args.length > 1) {
-            logger.error("Usage: lou [script]");
+            lou.reporter.error("Usage: lou [script]");
             System.exit(64);
         }
 
         if (args.length == 1) {
-            runFile(args[0]);
+            lou.runFile(args[0]);
             return;
         }
 
         if (args.length == 0) {
-            runPrompt();
+            lou.runPrompt();
         }
     }
 
-    private static void runFile(String sourcePath) throws IOException {
+    private void runFile(String sourcePath) throws IOException {
         Path path = Paths.get(sourcePath);
 
         if (!path.toFile().exists()) {
-            logger.error("Location {} doesn't exist.", sourcePath);
+            reporter.error("Location " + sourcePath + " doesn't exist.");
             System.exit(64);
         }
 
         byte[] bytes = Files.readAllBytes(path);
         run(new String(bytes, Charset.defaultCharset()));
 
-        if (ErrorHandler.hadError) {
+        if (reporter.hadError) {
             System.exit(65);
         }
 
-        if (ErrorHandler.hadRuntimeError) {
+        if (reporter.hadRuntimeError) {
             System.exit(70);
         }
     }
 
-    private static void runPrompt() throws IOException {
-        logger.info("Lou Interpreter");
+    private void runPrompt() throws IOException {
+        reporter.info("Lou Interpreter");
 
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader bufferReader = new BufferedReader(input);
@@ -72,33 +76,33 @@ public final class Lou {
             }
 
             run(line);
-            ErrorHandler.hadError = false;
+            reporter.hadError = false;
         }
     }
 
-    private static void run(String line) {
+    void run(String line) {
         // Scan source code tokens
-        Scanner scanner = new Scanner(line);
+        Scanner scanner = new Scanner(line, reporter);
         List<Token> tokens = scanner.scanTokens();
 
         // Stop if there was a lexical error.
-        if (ErrorHandler.hadError)
+        if (reporter.hadError)
             return;
 
         // Parse tokens
-        List<Stmt> statements = new Parser(tokens).parse();
+        List<Stmt> statements = new Parser(tokens, reporter).parse();
 
         // Stop if there was a syntax error.
-        if (ErrorHandler.hadError) {
+        if (reporter.hadError) {
             return;
         }
 
         // Resolve syntax
-        Resolver resolver = new Resolver(interpreter);
+        Resolver resolver = new Resolver(interpreter, reporter);
         resolver.resolve(statements);
 
         // Stop if the semantic analysis fails
-        if (ErrorHandler.hadError) {
+        if (reporter.hadError) {
             return;
         }
 

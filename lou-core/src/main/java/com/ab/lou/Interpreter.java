@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ab.lou.Expr.Assign;
 import com.ab.lou.Expr.Binary;
 import com.ab.lou.Expr.Grouping;
@@ -23,13 +20,14 @@ import com.ab.lou.Stmt.Print;
 import com.ab.lou.Stmt.Var;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    static final Logger logger = LoggerFactory.getLogger("client");
-
-    final Environment globals = new Environment();
+    private final Reporter reporter;
+    private final Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
 
-    Interpreter() {
+    Interpreter(Reporter reporter) {
+        this.reporter = reporter;
+
         globals.define("clock", new LouCallable() {
             @Override
             public int arity() {
@@ -54,7 +52,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 execute(statement);
             }
         } catch (LouExceptions.RuntimeError error) {
-            ErrorHandler.runtimeError(error);
+            reporter.runtimeError(error);
         }
     }
 
@@ -108,7 +106,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitPrintStmt(Print stmt) {
         Object value = evaluate(stmt.expression);
-        logger.info(stringify(value));
+        reporter.info(stringify(value));
         return null;
     }
 
