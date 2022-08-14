@@ -1,0 +1,22 @@
+print "first loop";
+
+for (var i = 0; i < 10; i = i + 1){
+    print i;
+    if (i == 6) {
+        break;
+    }
+}
+
+print "second loop";
+
+var i = 9;
+while (i > 4){
+    for (var j = 0; j < 2; j = j + 1){
+        print i * 10 + j;
+    }
+   i = i - 1;
+}
+
+if (i == 4) {
+    print "end";
+}

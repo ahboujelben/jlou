@@ -1,15 +1,15 @@
 // numbers
 print 1 * 2 + 3;
-print 2* (2 + 8)/2;
-print 1 /0;
-print 2 * (3 / 1) + 2 * (1 + (2/8));
+print 2* (2 + 8) / 2;
+print 1 / 0;
+print 2 * (3 / 1) + 2 * (1 + (2 / 8) );
 
 // strings
 print "this is a string";
-print "string" + "string2";
+print "string1" + " " + "string2";
 
 // booleans
 print 1 == 1;
-print "no" == "yes";
+print "aye" == "nah";
 print true and "valid";
 print false or "invalid";

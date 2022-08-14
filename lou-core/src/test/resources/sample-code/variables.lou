@@ -1,0 +1,21 @@
+var str = "text";
+print "this is a " + str;
+
+var a;
+print a;
+
+a = 1;
+print a;
+
+print "Scoping";
+
+{
+    var a = 2;
+    print a;
+
+    var b = 3;
+    print a + b;
+}
+
+print a;
+print b;

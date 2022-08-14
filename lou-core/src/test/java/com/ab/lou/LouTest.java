@@ -42,7 +42,7 @@ public class LouTest {
         // collect logger output
         String output = StreamSupport
                 .stream(listAppender.list.spliterator(), false)
-                .map(ILoggingEvent::getMessage)
+                .map(ILoggingEvent::getFormattedMessage)
                 .collect(Collectors.joining("\n"));
 
         // expected output
