@@ -1,0 +1,11 @@
+## Lexical Grammar
+
+NUMBER         → DIGIT+ ( "." DIGIT+ )?
+
+STRING         → "\"" <any char except "\"">* "\""
+
+IDENTIFIER     → ALPHA ( ALPHA | DIGIT )*
+
+ALPHA          → "a" ... "z" | "A" ... "Z" | "_"
+
+DIGIT          → "0" ... "9"
