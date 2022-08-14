@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Source code tokenizer.
+ * Generates lexical grammar.
+ */
 class Scanner {
     private static final Map<String, TokenType> keywords;
 

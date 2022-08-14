@@ -2,6 +2,9 @@ package com.ab.lou;
 
 import org.slf4j.Logger;
 
+/**
+ * Report information, and compile/runtime errors to users.
+ */
 class Reporter {
     private Logger logger;
 

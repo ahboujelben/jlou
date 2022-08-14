@@ -23,6 +23,9 @@ import com.ab.lou.Stmt.Return;
 import com.ab.lou.Stmt.Var;
 import com.ab.lou.Stmt.While;
 
+/**
+ * AST resolver.
+ */
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Reporter reporter;
     private final Interpreter interpreter;

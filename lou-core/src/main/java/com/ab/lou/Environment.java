@@ -3,6 +3,9 @@ package com.ab.lou;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manages variables lifetime during execution.
+ */
 class Environment {
     private static final String UNDEFINED_VAR = "Undefined variable";
 

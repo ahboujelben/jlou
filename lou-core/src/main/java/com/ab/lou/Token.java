@@ -2,6 +2,9 @@ package com.ab.lou;
 
 import java.util.Objects;
 
+/**
+ * Lou token structure.
+ */
 class Token {
     final TokenType type;
     final String lexeme;

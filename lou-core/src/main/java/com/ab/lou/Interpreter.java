@@ -19,6 +19,9 @@ import com.ab.lou.Stmt.Function;
 import com.ab.lou.Stmt.Print;
 import com.ab.lou.Stmt.Var;
 
+/**
+ * AST interpreter.
+ */
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private final Reporter reporter;
     private final Environment globals = new Environment();
@@ -59,17 +62,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     // Statements
 
     @Override
-    public Void visitVarStmt(Var stmt) {
-        Object value = null;
-        if (stmt.initializer != null) {
-            value = evaluate(stmt.initializer);
-        }
-
-        environment.define(stmt.name.lexeme, value);
-        return null;
-    }
-
-    @Override
     public Void visitBlockStmt(Block stmt) {
         executeBlock(stmt.statements, new Environment(environment));
         return null;
@@ -81,15 +73,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Void visitFunctionStmt(Function stmt) {
-        LouFunction function = new LouFunction(stmt, environment);
-        environment.define(stmt.name.lexeme, function);
+    public Void visitExpressionStmt(Expression stmt) {
+        evaluate(stmt.expression);
         return null;
     }
 
     @Override
-    public Void visitExpressionStmt(Expression stmt) {
-        evaluate(stmt.expression);
+    public Void visitFunctionStmt(Function stmt) {
+        LouFunction function = new LouFunction(stmt, environment);
+        environment.define(stmt.name.lexeme, function);
         return null;
     }
 
@@ -120,6 +112,17 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitVarStmt(Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, value);
+        return null;
+    }
+
+    @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         while (isTruthy(evaluate(stmt.condition))) {
             try {
@@ -145,51 +148,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         return value;
-    }
-
-    @Override
-    public Object visitLiteralExpr(Literal expr) {
-        return expr.value;
-    }
-
-    @Override
-    public Object visitVariableExpr(Variable expr) {
-        return lookUpVariable(expr.name, expr);
-    }
-
-    @Override
-    public Object visitGroupingExpr(Grouping expr) {
-        return evaluate(expr.expression);
-    }
-
-    @Override
-    public Object visitLogicalExpr(Expr.Logical expr) {
-        Object left = evaluate(expr.left);
-
-        if (expr.operator.type == TokenType.OR) {
-            if (isTruthy(left))
-                return left;
-        } else {
-            if (!isTruthy(left))
-                return left;
-        }
-
-        return evaluate(expr.right);
-    }
-
-    @Override
-    public Object visitUnaryExpr(Unary expr) {
-        Object right = evaluate(expr.right);
-
-        switch (expr.operator.type) {
-            case BANG:
-                return !isTruthy(right);
-            case MINUS:
-                checkNumberOperand(expr.operator, right);
-                return -(double) right;
-            default:
-                return null;
-        }
     }
 
     @Override
@@ -259,6 +217,51 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         return function.call(this, arguments);
+    }
+
+    @Override
+    public Object visitGroupingExpr(Grouping expr) {
+        return evaluate(expr.expression);
+    }
+
+    @Override
+    public Object visitLiteralExpr(Literal expr) {
+        return expr.value;
+    }
+
+    @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+
+        if (expr.operator.type == TokenType.OR) {
+            if (isTruthy(left))
+                return left;
+        } else {
+            if (!isTruthy(left))
+                return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
+    @Override
+    public Object visitUnaryExpr(Unary expr) {
+        Object right = evaluate(expr.right);
+
+        switch (expr.operator.type) {
+            case BANG:
+                return !isTruthy(right);
+            case MINUS:
+                checkNumberOperand(expr.operator, right);
+                return -(double) right;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Object visitVariableExpr(Variable expr) {
+        return lookUpVariable(expr.name, expr);
     }
 
     private void execute(Stmt stmt) {

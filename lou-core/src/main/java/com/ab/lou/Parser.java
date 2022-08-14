@@ -6,6 +6,10 @@ import java.util.List;
 
 import com.ab.lou.LouExceptions.ParseError;
 
+/**
+ * Source code parser.
+ * Generates the abstract syntax tree (AST).
+ */
 class Parser {
     private final Reporter reporter;
     private final List<Token> tokens;
