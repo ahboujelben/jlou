@@ -8,6 +8,8 @@ abstract class Stmt {
 
     R visitBreakStmt(Break stmt);
 
+    R visitClassStmt(Class stmt);
+
     R visitExpressionStmt(Expression stmt);
 
     R visitFunctionStmt(Function stmt);
@@ -46,6 +48,20 @@ abstract class Stmt {
     }
 
     final Token keyword;
+  }
+  static class Class extends Stmt {
+    Class(Token name, List<Stmt.Function> methods) {
+      this.name = name;
+      this.methods = methods;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitClassStmt(this);
+    }
+
+    final Token name;
+    final List<Stmt.Function> methods;
   }
   static class Expression extends Stmt {
     Expression(Expr expression) {

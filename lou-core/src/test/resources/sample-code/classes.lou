@@ -1,0 +1,49 @@
+class HelloClass {
+  init() {
+    this.field = "test field";
+  }
+  printMe() {
+    print "I'm a method in a class";
+  }
+}
+
+print HelloClass;
+var testInstance = HelloClass();
+print testInstance.field;
+testInstance.field = 2;
+print testInstance.field;
+print testInstance.printMe;
+testInstance.printMe();
+
+class Animal {
+  run() {
+    print "animal running";
+  }
+}
+
+var tiger = Animal();
+tiger.run();
+
+class Cake {
+  taste() {
+    var adjective = "delicious";
+    print "The " + this.flavor + " cake is " + adjective + "!";
+  }
+}
+
+var cake = Cake();
+cake.flavor = "German chocolate";
+cake.taste();
+
+class Circle {
+  init(radius) {
+    this.radius = radius;
+  }
+
+  getArea() {
+    return 3.141592653 * this.radius * this.radius;
+  }
+}
+
+var circle = Circle(4);
+print circle.getArea();

@@ -7,7 +7,7 @@ A tree-walk interpreter written in Java that builds upon Robert Nystrom's implem
 Lou can interpret source files written in Lou
 
 ```
-java -jar lou.jar sample/hello_world.lou
+java -jar lou.jar hello_world.lou
 ```
 
 or executed as a REPL:

@@ -30,7 +30,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Reporter reporter;
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
-    private CallableType currentFunction = null;
+    private CallableType currentFunction = CallableType.NONE;
+    private ClassType currentClass = ClassType.NONE;
     private boolean isInsideLoop = false;
 
     Resolver(Interpreter interpreter, Reporter reporter) {
@@ -58,6 +59,33 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
+        declare(stmt.name);
+        define(stmt.name);
+
+        beginScope();
+        scopes.peek().put("this", true);
+
+        for (Stmt.Function method : stmt.methods) {
+            CallableType declaration = CallableType.METHOD;
+
+            if (method.name.lexeme.equals("init")) {
+                declaration = CallableType.INITIALIZER;
+            }
+
+            resolveCallable(method, declaration);
+        }
+
+        endScope();
+
+        currentClass = enclosingClass;
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Expression stmt) {
         resolve(stmt.expression);
         return null;
@@ -68,9 +96,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name);
         define(stmt.name);
 
-        beginScope();
         resolveCallable(stmt, CallableType.FUNCTION);
-        endScope();
 
         return null;
     }
@@ -92,11 +118,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(Return stmt) {
-        if (currentFunction == null) {
+        if (currentFunction == CallableType.NONE) {
             reporter.error(stmt.keyword, "Can't return from top-level code.");
         }
 
         if (stmt.value != null) {
+            if (currentFunction == CallableType.INITIALIZER) {
+                reporter.error(stmt.keyword, "Can't return a value from an initializer.");
+            }
+
             resolve(stmt.value);
         }
 
@@ -151,6 +181,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitGetExpr(Expr.Get expr) {
+        resolve(expr.object);
+        return null;
+    }
+
+    @Override
     public Void visitGroupingExpr(Grouping expr) {
         resolve(expr.expression);
         return null;
@@ -165,6 +201,24 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitLogicalExpr(Logical expr) {
         resolve(expr.left);
         resolve(expr.right);
+        return null;
+    }
+
+    @Override
+    public Void visitSetExpr(Expr.Set expr) {
+        resolve(expr.value);
+        resolve(expr.object);
+        return null;
+    }
+
+    @Override
+    public Void visitThisExpr(Expr.This expr) {
+        if (currentClass == ClassType.NONE) {
+            reporter.error(expr.keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+
+        resolveLocal(expr, expr.keyword);
         return null;
     }
 
@@ -238,12 +292,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         CallableType enclosingFunction = currentFunction;
         currentFunction = type;
 
+        beginScope();
+
         for (Token param : function.params) {
             declare(param);
             define(param);
         }
         resolve(function.body);
 
+        endScope();
         currentFunction = enclosingFunction;
     }
 }

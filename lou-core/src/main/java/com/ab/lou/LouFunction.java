@@ -5,10 +5,18 @@ import java.util.List;
 class LouFunction implements LouCallable {
     private final Stmt.Function declaration;
     private final Environment closure;
+    private final boolean isInitializer;
 
-    LouFunction(Stmt.Function declaration, Environment closure) {
+    LouFunction(Stmt.Function declaration, Environment closure, boolean isInitializer) {
         this.declaration = declaration;
         this.closure = closure;
+        this.isInitializer = isInitializer;
+    }
+
+    LouFunction bind(LouInstance instance) {
+        Environment environment = new Environment(closure);
+        environment.define("this", instance);
+        return new LouFunction(declaration, environment, isInitializer);
     }
 
     @Override
@@ -27,8 +35,15 @@ class LouFunction implements LouCallable {
         try {
             interpreter.executeBlock(declaration.body, environment);
         } catch (LouExceptions.Return returnValue) {
+            if (isInitializer) {
+                return closure.getAt(0, "this");
+            }
+
             return returnValue.value;
         }
+
+        if (isInitializer)
+            return closure.getAt(0, "this");
 
         return null;
     }

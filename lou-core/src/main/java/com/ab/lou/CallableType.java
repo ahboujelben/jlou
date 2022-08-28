@@ -1,5 +1,8 @@
 package com.ab.lou;
 
 public enum CallableType {
-    FUNCTION
+    NONE,
+    FUNCTION,
+    INITIALIZER,
+    METHOD
 }
