@@ -15,24 +15,16 @@ print testInstance.field;
 print testInstance.printMe;
 testInstance.printMe();
 
-class Animal {
-  run() {
-    print "animal running";
-  }
-}
-
-var tiger = Animal();
-tiger.run();
 
 class Cake {
   taste() {
-    var adjective = "delicious";
+    var adjective = "interesting";
     print "The " + this.flavor + " cake is " + adjective + "!";
   }
 }
 
 var cake = Cake();
-cake.flavor = "German chocolate";
+cake.flavor = "watermelon";
 cake.taste();
 
 class Circle {
@@ -47,3 +39,37 @@ class Circle {
 
 var circle = Circle(4);
 print circle.getArea();
+
+class Animal {
+  init(name) {
+    this.name = name;
+  }
+
+  sayHi() {
+    print "Hi, I'm " + this.name + ".";
+  }
+
+  beCute() {
+    print "I'm cute.";
+  }
+}
+
+var dug = Animal("dug");
+dug.sayHi();
+dug.beCute();
+
+class Bird < Animal {
+  beCute() {
+    super.beCute();
+    print "Chirp Chirp!";
+  }
+
+  fly(){
+    print "I believe I can fly!";
+  }
+}
+
+var piper = Bird("piper");
+piper.sayHi();
+piper.beCute();
+piper.fly();

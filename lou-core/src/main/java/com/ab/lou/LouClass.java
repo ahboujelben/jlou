@@ -5,16 +5,22 @@ import java.util.Map;
 
 class LouClass implements LouCallable {
     final String name;
+    final LouClass superclass;
     private final Map<String, LouFunction> methods;
 
-    LouClass(String name, Map<String, LouFunction> methods) {
+    LouClass(String name, LouClass superclass, Map<String, LouFunction> methods) {
         this.name = name;
+        this.superclass = superclass;
         this.methods = methods;
     }
 
     LouFunction findMethod(String name) {
         if (methods.containsKey(name)) {
             return methods.get(name);
+        }
+
+        if (superclass != null) {
+            return superclass.findMethod(name);
         }
 
         return null;

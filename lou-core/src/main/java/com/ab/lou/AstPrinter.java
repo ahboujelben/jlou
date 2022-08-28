@@ -5,6 +5,7 @@ import com.ab.lou.Expr.Call;
 import com.ab.lou.Expr.Get;
 import com.ab.lou.Expr.Logical;
 import com.ab.lou.Expr.Set;
+import com.ab.lou.Expr.Super;
 import com.ab.lou.Expr.This;
 import com.ab.lou.Expr.Variable;
 
@@ -66,6 +67,11 @@ class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitSetExpr(Set expr) {
         return parenthesize("set", expr);
+    }
+
+    @Override
+    public String visitSuperExpr(Super expr) {
+        return "super." + expr.method.lexeme;
     }
 
     @Override
